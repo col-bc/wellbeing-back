@@ -1,3 +1,4 @@
+from datetime import datetime
 from functools import wraps
 
 from flask import Blueprint, current_app, g, jsonify, request
@@ -63,7 +64,7 @@ def register():
     user: User = User(
         name=data.get('name'),
         email=data.get('email'),
-        dob=data.get('dob'),
+        dob=datetime.strptime(data.get('dob'), '%Y-%m-%d'),
         password_hash=User.hash_password(data.get('password'))
     )
     db.session.add(user)

@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime
 from flask import Blueprint, g, jsonify, request
 from flask_cors import CORS
 
@@ -110,7 +110,7 @@ def create_check_in():
     ci = CheckIn(
         rating=data.get('rating'),
         notes=data.get('notes'),
-        date=data.get('date'),
+        date=datetime.strptime(data.get('date'), '%Y-%m-%d'),
         activities=data.get('activities'),
         symptoms=data.get('symptoms'),
         user_id = g.user.id

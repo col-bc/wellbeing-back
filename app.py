@@ -11,11 +11,10 @@ def create_app():
     app.config.update(
         SECRET_KEY='dev',
         DEBUG=1,
-        SQLALCHEMY_DATABASE_URI='mysql+pymysql://remote:CBC00p3r!@192.168.1.74/wellbeing',
+        # SQLALCHEMY_DATABASE_URI='mysql+pymysql://remote:CBC00p3r!@192.168.1.74/wellbeing',
+        SQLALCHEMY_DATABASE_URI="sqlite:///./database.sqlite",
         SQLALCHEMY_TRACK_MODIFICATIONS=False
     )
-    
-    from .models import User
     
     with app.app_context():
         db.init_app(app)

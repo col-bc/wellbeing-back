@@ -1,0 +1,5 @@
+.gjtignore
+migrations/*
+.pyc
+.pyo
+database.sqlite
