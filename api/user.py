@@ -89,9 +89,20 @@ def delete_user():
 @login_required
 def get_check_ins():
     ''' Get all check-ins for token owner '''
+    
+    page = request.args.get('page', 1, type=int)
+    limit = request.args.get('limit', 10, type=int)
+    
+    check_ins = CheckIn.query.filter_by(user_id=g.user.id).order_by(CheckIn.date.desc()).paginate(page, limit, False)   
+    print(check_ins)
+    print(type(check_ins)) 
+    
     return jsonify({
-        'check_ins': [check_in.serialize() for check_in in g.user.check_ins],
-        'totals': CheckIn.get_rating_totals(g.user.id)
+        'check_ins': [check_in.serialize() for check_in in check_ins.items],
+        'totals': CheckIn.get_rating_totals(g.user.id),
+        'pages': check_ins.pages,
+        'page': check_ins.page,
+        'has_next': check_ins.has_next,
     })
 
 
@@ -110,7 +121,7 @@ def create_check_in():
     ci = CheckIn(
         rating=data.get('rating'),
         notes=data.get('notes'),
-        date=datetime.strptime(data.get('date'), '%Y-%m-%d'),
+        date=datetime.strptime(data.get('date'), '%Y-%m-%dT%H:%M'),
         activities=data.get('activities'),
         symptoms=data.get('symptoms'),
         user_id = g.user.id
@@ -176,6 +187,9 @@ def create_journal_page():
     ):
         return jsonify({'error': 'Invalid payload'}), 400
     
-    page = g.user.journal[0].add_page(data.get('body'), data.get('date'))
+    page = g.user.journal[0].add_page(
+        data.get('body'),
+        datetime.strptime(data.get('date'), '%Y-%m-%dT%H:%M')
+    )
     
     return jsonify(page.serialize()), 201
