@@ -3,7 +3,7 @@ from flask import Blueprint, g, jsonify, request
 from flask_cors import CORS
 
 from ..app import db
-from ..models import CheckIn, Journal
+from ..models import CheckIn, Journal, JournalPage
 from .auth import login_required
 
 user_api = Blueprint('user_api', __name__, url_prefix='/api/user')
@@ -94,9 +94,7 @@ def get_check_ins():
     limit = request.args.get('limit', 10, type=int)
     
     check_ins = CheckIn.query.filter_by(user_id=g.user.id).order_by(CheckIn.date.desc()).paginate(page, limit, False)   
-    print(check_ins)
-    print(type(check_ins)) 
-    
+
     return jsonify({
         'check_ins': [check_in.serialize() for check_in in check_ins.items],
         'totals': CheckIn.get_rating_totals(g.user.id),
@@ -158,6 +156,18 @@ def update_check_in_by_id(check_in_id):
     return jsonify(ci.serialize())
 
 
+@user_api.route('/check-in/<int:check_in_id>', methods=['DELETE'])
+@login_required
+def delete_check_in_by_id(check_in_id):
+    ''' Delete a check-in by id '''
+    ci = CheckIn.query.filter_by(id=check_in_id).first()
+    if not ci:
+        return jsonify({'error': 'Check-in not found'}), 404
+    db.session.delete(ci)
+    db.session.commit()
+    return jsonify({'success': 'Check-in deleted'}), 200
+
+
 ''' Journal endpoints '''
 
 
@@ -193,3 +203,34 @@ def create_journal_page():
     )
     
     return jsonify(page.serialize()), 201
+
+
+@user_api.route('/journal/<int:page_id>', methods=['PUT'])
+@login_required
+def update_journal_page(page_id: int):
+    ''' Update a journal page by id '''
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'Invalid payload'}), 400
+    
+    page = JournalPage.query.filter_by(id=page_id).first()
+    if not page:
+        return jsonify({'error': 'Page not found'}), 404
+    
+    page.update(data)
+    
+    return jsonify(page.serialize())
+
+
+@user_api.route('/journal/<int:page_id>', methods=['DELETE'])
+@login_required
+def delete_journal_pate(page_id: int):
+    ''' Delete a journal page by id '''
+    page = JournalPage.query.filter_by(id=page_id).first()
+    if not page:
+        return jsonify({'error': 'Page not found'}), 404
+    
+    db.session.delete(page)
+    db.session.commit()
+    
+    return jsonify({'success': 'Page deleted'}), 200
