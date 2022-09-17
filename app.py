@@ -11,8 +11,7 @@ def create_app():
     app.config.update(
         SECRET_KEY='dev',
         DEBUG=1,
-        # SQLALCHEMY_DATABASE_URI='mysql+pymysql://remote:CBC00p3r!@192.168.1.74/wellbeing',
-        SQLALCHEMY_DATABASE_URI="sqlite:///./database.sqlite",
+        SQLALCHEMY_DATABASE_URI='mysql+pymysql://remote:CBC00p3r!@192.168.1.74/wellbeing',
         SQLALCHEMY_TRACK_MODIFICATIONS=False
     )
     
